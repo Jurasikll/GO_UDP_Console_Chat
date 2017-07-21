@@ -65,11 +65,11 @@ func main() {
 
 func check_answer(conn *net.UDPConn) {
 	not_reading_server_answer = false
-	time.Sleep(time.Second * 1)
+	//time.Sleep(time.Second * 1)
 	answer := make([]byte, 1024)
 	n, _, _ := conn.ReadFromUDP(answer)
 	fmt.Println(string(answer[0:n]))
-
+	not_reading_server_answer = true
 }
 
 func input_local_ip() string {
@@ -93,7 +93,7 @@ func input_server_ip_port() string {
 
 func check_msg(conn *net.UDPConn) {
 	not_reading_console_write = false
-	time.Sleep(time.Second * 1)
+	//time.Sleep(time.Second * 1)
 
 	reader := bufio.NewReader(os.Stdin)
 	text, _ := reader.ReadString('\n')
@@ -105,4 +105,5 @@ func check_msg(conn *net.UDPConn) {
 	if err != nil {
 		fmt.Println(err)
 	}
+	not_reading_console_write = true
 }
