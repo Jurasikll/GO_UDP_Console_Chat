@@ -12,6 +12,8 @@ import (
 
 var clients_ip_port []string
 var clients_name []string
+var not_reading_console_write bool = true
+var not_reading_server_answer bool = true
 
 const SERVER_IP_PORT string = ""
 const LOCAL_IP string = ""
@@ -50,13 +52,19 @@ func main() {
 	defer Conn.Close()
 
 	for {
-		go check_answer(Conn)
-		go check_msg(Conn)
+		if not_reading_console_write {
+			go check_msg(Conn)
+		}
+		if not_reading_server_answer {
+			go check_answer(Conn)
+		}
+
 		time.Sleep(time.Second * 1)
 	}
 }
 
 func check_answer(conn *net.UDPConn) {
+	not_reading_server_answer = false
 	time.Sleep(time.Second * 1)
 	answer := make([]byte, 1024)
 	n, _, _ := conn.ReadFromUDP(answer)
@@ -65,8 +73,9 @@ func check_answer(conn *net.UDPConn) {
 }
 
 func input_local_ip() string {
-	const msg string = "Введите локальный ip"
-	fmt.Println(msg)
+	const MSG string = "Введите локальный ip"
+
+	fmt.Println(MSG)
 	reader := bufio.NewReader(os.Stdin)
 	text, _ := reader.ReadString('\n')
 	text = strings.TrimSpace(text)
@@ -83,7 +92,9 @@ func input_server_ip_port() string {
 }
 
 func check_msg(conn *net.UDPConn) {
+	not_reading_console_write = false
 	time.Sleep(time.Second * 1)
+
 	reader := bufio.NewReader(os.Stdin)
 	text, _ := reader.ReadString('\n')
 	text = strings.TrimSpace(text)
