@@ -6,12 +6,16 @@ import (
 	"fmt"
 	"net"
 	"os"
+	"os/exec"
 	"strings"
 	"time"
 )
 
 var clients_ip_port []string
 var clients_name []string
+var not_reading_console_write bool = true
+var not_reading_server_answer bool = true
+var msg_log []string
 
 const SERVER_IP_PORT string = ""
 const LOCAL_IP string = ""
@@ -46,27 +50,43 @@ func main() {
 
 	Conn, err := net.DialUDP(STR_UDP, LocalAddr, ServerAddr)
 	CheckError(err)
-
+	fmt.Println("Введи ник нажми Enter")
 	defer Conn.Close()
-
 	for {
-		go check_answer(Conn)
-		go check_msg(Conn)
+		if not_reading_console_write {
+			go check_msg(Conn)
+		}
+		if not_reading_server_answer {
+			go check_answer(Conn)
+		}
+
 		time.Sleep(time.Second * 1)
 	}
 }
 
 func check_answer(conn *net.UDPConn) {
-	time.Sleep(time.Second * 1)
+	not_reading_server_answer = false
+	//time.Sleep(time.Second * 1)
 	answer := make([]byte, 1024)
 	n, _, _ := conn.ReadFromUDP(answer)
-	fmt.Println(string(answer[0:n]))
+	print_to_chat(string(answer[0:n]))
+	not_reading_server_answer = true
+}
 
+func print_to_chat(msg string) {
+	cmd := exec.Command("cmd", "/c", "cls")
+	cmd.Stdout = os.Stdout
+	cmd.Run()
+	msg_log = append(msg_log, msg)
+	for _, msg_from_log := range msg_log {
+		fmt.Println(msg_from_log)
+	}
 }
 
 func input_local_ip() string {
-	const msg string = "Введите локальный ip"
-	fmt.Println(msg)
+	const MSG string = "Введите локальный ip"
+
+	fmt.Println(MSG)
 	reader := bufio.NewReader(os.Stdin)
 	text, _ := reader.ReadString('\n')
 	text = strings.TrimSpace(text)
@@ -83,7 +103,9 @@ func input_server_ip_port() string {
 }
 
 func check_msg(conn *net.UDPConn) {
-	time.Sleep(time.Second * 1)
+	not_reading_console_write = false
+	//time.Sleep(time.Second * 1)
+
 	reader := bufio.NewReader(os.Stdin)
 	text, _ := reader.ReadString('\n')
 	text = strings.TrimSpace(text)
@@ -94,4 +116,5 @@ func check_msg(conn *net.UDPConn) {
 	if err != nil {
 		fmt.Println(err)
 	}
+	not_reading_console_write = true
 }
