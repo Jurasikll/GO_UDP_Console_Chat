@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net"
 	"os"
+	"os/exec"
 	"strings"
 	"time"
 )
@@ -14,6 +15,7 @@ var clients_ip_port []string
 var clients_name []string
 var not_reading_console_write bool = true
 var not_reading_server_answer bool = true
+var msg_log []string
 
 const SERVER_IP_PORT string = ""
 const LOCAL_IP string = ""
@@ -48,9 +50,8 @@ func main() {
 
 	Conn, err := net.DialUDP(STR_UDP, LocalAddr, ServerAddr)
 	CheckError(err)
-
+	fmt.Println("Введи ник нажми Enter")
 	defer Conn.Close()
-
 	for {
 		if not_reading_console_write {
 			go check_msg(Conn)
@@ -68,8 +69,18 @@ func check_answer(conn *net.UDPConn) {
 	//time.Sleep(time.Second * 1)
 	answer := make([]byte, 1024)
 	n, _, _ := conn.ReadFromUDP(answer)
-	fmt.Println(string(answer[0:n]))
+	print_to_chat(string(answer[0:n]))
 	not_reading_server_answer = true
+}
+
+func print_to_chat(msg string) {
+	cmd := exec.Command("cmd", "/c", "cls")
+	cmd.Stdout = os.Stdout
+	cmd.Run()
+	msg_log = append(msg_log, msg)
+	for _, msg_from_log := range msg_log {
+		fmt.Println(msg_from_log)
+	}
 }
 
 func input_local_ip() string {
