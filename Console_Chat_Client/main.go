@@ -15,6 +15,7 @@ var clients_name []string
 
 const SERVER_IP_PORT string = ""
 const LOCAL_IP string = ""
+const STR_UDP = "udp"
 
 func CheckError(err error) {
 	if err != nil {
@@ -37,13 +38,13 @@ func main() {
 		ip_port_local = LOCAL_IP
 	}
 
-	ServerAddr, err := net.ResolveUDPAddr("udp", ip_port_server_local)
+	ServerAddr, err := net.ResolveUDPAddr(STR_UDP, ip_port_server_local)
 	CheckError(err)
 
-	LocalAddr, err := net.ResolveUDPAddr("udp", ip_port_local)
+	LocalAddr, err := net.ResolveUDPAddr(STR_UDP, ip_port_local)
 	CheckError(err)
 
-	Conn, err := net.DialUDP("udp", LocalAddr, ServerAddr)
+	Conn, err := net.DialUDP(STR_UDP, LocalAddr, ServerAddr)
 	CheckError(err)
 
 	defer Conn.Close()
