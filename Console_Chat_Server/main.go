@@ -54,7 +54,6 @@ func main() {
 func broadcast(client_name string, msg string, srv *net.UDPConn) {
 	var msgToAll string
 	msgToAll = client_name + ":" + msg
-	//msgToAll = msg
 	for _, client := range clients_ip_port {
 		temp_client, _ := net.ResolveUDPAddr("udp", client.String())
 		fmt.Printf("This is addres - %s", client.String())

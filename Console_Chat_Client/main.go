@@ -59,14 +59,12 @@ func main() {
 		if not_reading_server_answer {
 			go check_answer(Conn)
 		}
-
 		time.Sleep(time.Second * 1)
 	}
 }
 
 func check_answer(conn *net.UDPConn) {
 	not_reading_server_answer = false
-	//time.Sleep(time.Second * 1)
 	answer := make([]byte, 1024)
 	n, _, _ := conn.ReadFromUDP(answer)
 	print_to_chat(string(answer[0:n]))
@@ -85,36 +83,53 @@ func print_to_chat(msg string) {
 
 func input_local_ip() string {
 	const MSG string = "Введите локальный ip"
-
 	fmt.Println(MSG)
-	reader := bufio.NewReader(os.Stdin)
-	text, _ := reader.ReadString('\n')
-	text = strings.TrimSpace(text)
-	return text
+	return read_console_write()
 }
 
 func input_server_ip_port() string {
 	const MSG string = "введите ip и port сервера в формате {ip}:{port}"
 	fmt.Println(MSG)
-	reader := bufio.NewReader(os.Stdin)
-	text, _ := reader.ReadString('\n')
-	text = strings.TrimSpace(text)
-	return text
+	return read_console_write()
 }
 
 func check_msg(conn *net.UDPConn) {
+	const COMMAND_START_PREF = "-"
 	not_reading_console_write = false
-	//time.Sleep(time.Second * 1)
 
-	reader := bufio.NewReader(os.Stdin)
-	text, _ := reader.ReadString('\n')
-	text = strings.TrimSpace(text)
-	//fmt.Println(text)
+	text := read_console_write()
 
-	buf := []byte(text)
-	_, err := conn.Write(buf)
-	if err != nil {
-		fmt.Println(err)
+	if strings.HasPrefix(text, COMMAND_START_PREF) {
+		commands_exec(text)
+	} else {
+		buf := []byte(text)
+		_, err := conn.Write(buf)
+		if err != nil {
+			fmt.Println(err)
+		}
 	}
+
 	not_reading_console_write = true
+}
+
+func read_console_write() string {
+	const COMMAND_START_PREF = "-"
+	var text string
+	reader := bufio.NewReader(os.Stdin)
+	text, _ = reader.ReadString('\n')
+	text = strings.TrimSpace(text)
+	if strings.HasPrefix(text, COMMAND_START_PREF) {
+
+	}
+	return text
+}
+
+func commands_exec(com string) {
+	const COMMAND_AND_OPTIONS_DELIM = " "
+	var comands_discript []string
+	comands_discript = strings.Split(com, COMMAND_AND_OPTIONS_DELIM)
+	for _, elem := range comands_discript {
+		fmt.Println(elem)
+	}
+
 }
