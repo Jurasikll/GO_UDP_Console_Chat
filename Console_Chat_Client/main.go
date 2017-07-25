@@ -99,16 +99,13 @@ func check_msg(conn *net.UDPConn) {
 
 	text := read_console_write()
 
-	if strings.HasPrefix(text, COMMAND_START_PREF) {
-		commands_exec(text)
-	} else {
+	if text != "" {
 		buf := []byte(text)
 		_, err := conn.Write(buf)
 		if err != nil {
 			fmt.Println(err)
 		}
 	}
-
 	not_reading_console_write = true
 }
 
@@ -119,9 +116,42 @@ func read_console_write() string {
 	text, _ = reader.ReadString('\n')
 	text = strings.TrimSpace(text)
 	if strings.HasPrefix(text, COMMAND_START_PREF) {
-
+		run_command(text)
+		text = ""
 	}
 	return text
+}
+
+func run_command(cmd_str string) {
+	const COMMAND_ARGS_SEPARATE string = " "
+	const COMMAND_EXEC_OK_CODE int = 1
+	const COMMAND_NAME int = 0
+
+	var commands_res_code int = 0
+	var cmd_arr []string
+	var cmd_args []string
+	var cmd_arr_len int
+	commands_map := map[string]func([]string) int{
+		"-help": cmd_help,
+		"-h":    cmd_help,
+	}
+
+	cmd_arr = strings.Split(cmd_str, COMMAND_ARGS_SEPARATE)
+	cmd_arr_len = len(cmd_arr)
+	fmt.Println("len - ", cmd_arr_len)
+	if cmd_arr_len > 1 {
+
+		cmd_args = cmd_arr[1 : len(cmd_arr)-1]
+	}
+	commands_res_code = commands_map[cmd_arr[COMMAND_NAME]](cmd_args)
+	if commands_res_code > COMMAND_EXEC_OK_CODE {
+		fmt.Println(commands_res_code)
+	}
+
+}
+func cmd_help(cmd_args []string) int {
+	fmt.Println("args len - ", len(cmd_args))
+	return 1
 }
 
 func commands_exec(com string) {
