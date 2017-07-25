@@ -124,6 +124,7 @@ func read_console_write() string {
 
 func run_command(cmd_str string) {
 	const COMMAND_ARGS_SEPARATE string = " "
+
 	const COMMAND_EXEC_OK_CODE int = 1
 	const COMMAND_NAME int = 0
 
@@ -140,8 +141,7 @@ func run_command(cmd_str string) {
 	cmd_arr_len = len(cmd_arr)
 	fmt.Println("len - ", cmd_arr_len)
 	if cmd_arr_len > 1 {
-
-		cmd_args = cmd_arr[1 : len(cmd_arr)-1]
+		cmd_args = cmd_arr[1:len(cmd_arr)]
 	}
 	commands_res_code = commands_map[cmd_arr[COMMAND_NAME]](cmd_args)
 	if commands_res_code > COMMAND_EXEC_OK_CODE {
@@ -151,6 +151,18 @@ func run_command(cmd_str string) {
 }
 func cmd_help(cmd_args []string) int {
 	fmt.Println("args len - ", len(cmd_args))
+	const EMPTY_STRING = ""
+	var temp_arg string
+	help_arg_map := map[string]string{
+		"help": "Помощь, без аргументов (-help,-h) выводить список команд, с аргументами (-help {название команды},-h {название команды}) выводит описание команды",
+		"h":    "Помощь, без аргументов (-help,-h) выводить список команд, с аргументами (-help {название команды},-h {название команды}) выводит описание команды",
+	}
+	for _, elm := range cmd_args {
+		temp_arg = help_arg_map[elm]
+		if temp_arg != EMPTY_STRING {
+			fmt.Println(temp_arg)
+		}
+	}
 	return 1
 }
 
