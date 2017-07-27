@@ -9,6 +9,10 @@ import (
 	"os/exec"
 	"strings"
 	"time"
+
+	"github.com/google/gxui"
+	"github.com/google/gxui/drivers/gl"
+	"github.com/google/gxui/themes/dark"
 )
 
 var clients_ip_port []string
@@ -16,10 +20,14 @@ var clients_name []string
 var not_reading_console_write bool = true
 var not_reading_server_answer bool = true
 var msg_log []string
+var ip_port_server_local string = ""
+var ip_port_local string = ""
+var nick_name string = ""
 
 const SERVER_IP_PORT string = ""
 const LOCAL_IP string = ""
 const STR_UDP = "udp"
+const EMPTY_STRING = ""
 
 func CheckError(err error) {
 	if err != nil {
@@ -29,8 +37,6 @@ func CheckError(err error) {
 
 func main() {
 
-	var ip_port_server_local string
-	var ip_port_local string
 	if len(SERVER_IP_PORT) == 0 {
 		ip_port_server_local = input_server_ip_port()
 	} else {
@@ -63,6 +69,10 @@ func main() {
 	}
 }
 
+//func auth(srv_ip_port string, clt_ip_port string, nick_name string) *net.UDPConn {
+
+//}
+
 func check_answer(conn *net.UDPConn) {
 	not_reading_server_answer = false
 	answer := make([]byte, 1024)
@@ -94,11 +104,9 @@ func input_server_ip_port() string {
 }
 
 func check_msg(conn *net.UDPConn) {
-	const COMMAND_START_PREF = "-"
 	not_reading_console_write = false
 
 	text := read_console_write()
-
 	if text != "" {
 		buf := []byte(text)
 		_, err := conn.Write(buf)
@@ -106,6 +114,7 @@ func check_msg(conn *net.UDPConn) {
 			fmt.Println(err)
 		}
 	}
+
 	not_reading_console_write = true
 }
 
@@ -124,7 +133,6 @@ func read_console_write() string {
 
 func run_command(cmd_str string) {
 	const COMMAND_ARGS_SEPARATE string = " "
-
 	const COMMAND_EXEC_OK_CODE int = 1
 	const COMMAND_NAME int = 0
 
@@ -139,7 +147,6 @@ func run_command(cmd_str string) {
 
 	cmd_arr = strings.Split(cmd_str, COMMAND_ARGS_SEPARATE)
 	cmd_arr_len = len(cmd_arr)
-	fmt.Println("len - ", cmd_arr_len)
 	if cmd_arr_len > 1 {
 		cmd_args = cmd_arr[1:len(cmd_arr)]
 	}
@@ -150,8 +157,7 @@ func run_command(cmd_str string) {
 
 }
 func cmd_help(cmd_args []string) int {
-	fmt.Println("args len - ", len(cmd_args))
-	const EMPTY_STRING = ""
+
 	var temp_arg string
 	help_arg_map := map[string]string{
 		"help": "Помощь, без аргументов (-help,-h) выводить список команд, с аргументами (-help {название команды},-h {название команды}) выводит описание команды",
@@ -164,14 +170,4 @@ func cmd_help(cmd_args []string) int {
 		}
 	}
 	return 1
-}
-
-func commands_exec(com string) {
-	const COMMAND_AND_OPTIONS_DELIM = " "
-	var comands_discript []string
-	comands_discript = strings.Split(com, COMMAND_AND_OPTIONS_DELIM)
-	for _, elem := range comands_discript {
-		fmt.Println(elem)
-	}
-
 }
