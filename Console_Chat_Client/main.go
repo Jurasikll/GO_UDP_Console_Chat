@@ -13,7 +13,7 @@ import (
 
 var clients_ip_port []string
 var clients_name []string
-var not_reading_console_write bool = true
+var reading_console_write bool = true
 var not_reading_server_answer bool = true
 var msg_log []string
 var ip_port_server_local string = ""
@@ -55,13 +55,13 @@ func main() {
 	fmt.Println("Введи ник нажми Enter")
 	defer Conn.Close()
 	for {
-		if not_reading_console_write {
+		if reading_console_write {
 			go check_msg(Conn)
 		}
 		if not_reading_server_answer {
 			go check_answer(Conn)
 		}
-		time.Sleep(time.Second * 1)
+		time.Sleep(time.Microsecond * 1000)
 	}
 }
 
@@ -100,7 +100,7 @@ func input_server_ip_port() string {
 }
 
 func check_msg(conn *net.UDPConn) {
-	not_reading_console_write = false
+	reading_console_write = false
 
 	text := read_console_write()
 	if text != "" {
@@ -111,7 +111,7 @@ func check_msg(conn *net.UDPConn) {
 		}
 	}
 
-	not_reading_console_write = true
+	reading_console_write = true
 }
 
 func read_console_write() string {
